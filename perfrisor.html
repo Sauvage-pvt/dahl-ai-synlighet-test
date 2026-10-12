@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Per Frisør, herreklipp i Steinkjer (testside)</title>
+<meta name="description" content="Testside for AI-synlighet: Per Frisør, herreklipp og skjegg i Steinkjer. Åpent tirsdag til lørdag, med chatbooking av ledige tider.">
+<link rel="canonical" href="https://example.netlify.app/perfrisor.html">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HairSalon",
+  "name": "Per Frisør",
+  "description": "Testside. Herreklipp og skjegg i Steinkjer. Ikke en ekte frisør.",
+  "url": "https://example.netlify.app/perfrisor.html",
+  "telephone": "+47 000 00 000",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Eksempelveien 1",
+    "addressLocality": "Steinkjer",
+    "addressRegion": "Trøndelag",
+    "addressCountry": "NO"
+  },
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "09:00",
+    "closes": "17:00"
+  }],
+  "makesOffer": [
+    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Klipp", "description": "Herreklipp, 45 minutter"}},
+    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Klipp og skjegg", "description": "Herreklipp og skjeggtrimming, 60 minutter"}}
+  ]
+}
+</script>
+<style>
+:root{
+  --bg:#f7f5f0; --surface:#ffffff; --fg:#1f1d1a; --muted:#645f57; --line:#e2dccf;
+  --accent:#2f5d50; --accent-fg:#ffffff; --warn-bg:#fff4d6; --warn-fg:#5e4300;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --surface:#1d2024; --fg:#ece8df; --muted:#9b958a; --line:#30343a;
+    --accent:#7fc2ac; --accent-fg:#0f1d18; --warn-bg:#3a3118; --warn-fg:#f1d58c;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a; --surface:#1d2024; --fg:#ece8df; --muted:#9b958a; --line:#30343a;
+  --accent:#7fc2ac; --accent-fg:#0f1d18; --warn-bg:#3a3118; --warn-fg:#f1d58c;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:24px}
+.test{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:20px}
+nav{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:15px;margin-bottom:28px}
+nav a{color:var(--accent);text-decoration:none}
+nav a:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.15;margin:0 0 10px;text-wrap:balance;font-weight:700}
+h2{font-size:22px;margin:40px 0 12px;font-weight:650}
+p{margin:0 0 12px;max-width:66ch}
+.lead{font-size:18px;color:var(--muted)}
+.cta{display:inline-block;margin-top:8px;background:var(--accent);color:var(--accent-fg);padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:15px;max-width:420px}
+td{padding:6px 0;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;color:var(--muted)}
+details{border-bottom:1px solid var(--line);padding:12px 0}
+summary{cursor:pointer;font-weight:600}
+details p{margin:8px 0 0;color:var(--muted)}
+.chat-frame{width:100%;height:600px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="test"><strong>Testside.</strong> Per Frisør er en fiktiv testkunde for AI-synlighet og bookingflyt. Det er ikke en ekte frisør, og adresse og telefon er eksempeldata.</p>
+
+  <nav aria-label="Hovedmeny">
+    <a href="#tjenester">Tjenester</a>
+    <a href="#apningstider">Åpningstider</a>
+    <a href="#om">Om</a>
+    <a href="#anmeldelser">Anmeldelser</a>
+    <a href="#book">Book time</a>
+    <a href="#kontakt">Kontakt</a>
+  </nav>
+
+  <main>
+    <header>
+      <h1>Per Frisør</h1>
+      <p class="lead">Herreklipp og skjeggtrimming i Steinkjer. Åpent tirsdag til lørdag.</p>
+      <a class="cta" href="#book">Book time</a>
+    </header>
+
+    <h2 id="tjenester">Tjenester</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>Klipp</h3>
+        <p>Herreklipp med vask og føn. Varighet 45 minutter.</p>
+      </article>
+      <article class="card">
+        <h3>Klipp og skjegg</h3>
+        <p>Herreklipp og trimming av skjegg med kontur. Varighet 60 minutter.</p>
+      </article>
+    </div>
+
+    <h2 id="apningstider">Åpningstider</h2>
+    <table>
+      <tr><td>Mandag</td><td>Stengt</td></tr>
+      <tr><td>Tirsdag til fredag</td><td>09:00 til 17:00</td></tr>
+      <tr><td>Lørdag</td><td>09:00 til 17:00</td></tr>
+      <tr><td>Søndag</td><td>Stengt</td></tr>
+    </table>
+    <p style="margin-top:12px">Lunsj 12:00 til 13:00. Ledige tider vises i booking-chatten under.</p>
+
+    <h2 id="om">Om oss</h2>
+    <p>Per Frisør er en liten herrefrisør i Steinkjer. Vi har fokus på rolige klipp, faste tider og at du slipper å vente. Du booker selv i chatten, og får bekreftelse med referanse og avbestillingskode.</p>
+
+    <h2 id="anmeldelser">Anmeldelser</h2>
+    <p>Testsiden har ingen Google-anmeldelser ennå, og vi viser ingen påfunnede. Når en ekte Google-profil finnes, legges lenke og stjernesnitt inn her.</p>
+
+    <h2 id="book">Book time</h2>
+    <p>Velg tjeneste, dag og tid i chatten. Du får en bekreftelse med referanse og en kode for avbestilling.</p>
+    <iframe class="chat-frame" src="perfrisor-chat.html" title="Bookingchat for Per Frisør" loading="lazy"></iframe>
+    <p style="margin-top:10px;font-size:14px;color:var(--muted)"><a href="perfrisor-chat.html">Åpne chatten i egen fane</a></p>
+
+    <h2>Ofte stilte spørsmål</h2>
+    <details>
+      <summary>Hvor ligger dere?</summary>
+      <p>Eksempelveien 1, Steinkjer. Adressen er fiktiv og brukes i testen.</p>
+    </details>
+    <details>
+      <summary>Hvordan booker jeg time?</summary>
+      <p>Bruk bookingchatten på denne siden. Velg tjeneste, dag og tid, og bekreft med navn og e-post.</p>
+    </details>
+    <details>
+      <summary>Hvor lang tid tar en klipp?</summary>
+      <p>Klipp tar 45 minutter. Klipp og skjegg tar 60 minutter.</p>
+    </details>
+    <details>
+      <summary>Kan jeg avbestille?</summary>
+      <p>Ja. Bruk avbestillingskoden du fikk i bekreftelsen, i chatten under «Avbestill time».</p>
+    </details>
+  </main>
+
+  <footer id="kontakt">
+    <p>Adresse: Eksempelveien 1, Steinkjer (testadresse)<br>Telefon: +47 000 00 000 (testnummer)</p>
+    <p>Testside for AI-synlighet. Opprettet oktober 2026.</p>
+  </footer>
+</div>
+</body>
+</html>
