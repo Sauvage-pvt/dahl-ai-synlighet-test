@@ -46,7 +46,18 @@
 </header>
 
 <div class="wrap">
-  <div class="tabs">
+  <section class="live" style="background:#fff;border-radius:8px;padding:1.1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-top:1rem">
+    <h2 style="color:#0f6e5c;margin:0 0 .4rem">Test en kundes side nå</h2>
+    <p class="note" style="margin:0 0 .7rem">Skriv inn adressen og trykk Sjekk. Analysen kjøres live mot nettsiden til kunden.</p>
+    <form id="liveForm" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end">
+      <label style="flex:2 1 260px">Nettside<br><input id="liveUrl" placeholder="f.eks. bedrift.no" required style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <label style="flex:1 1 140px">Sted<br><input id="liveSted" placeholder="f.eks. Steinkjer" style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <button id="liveBtn" type="submit" style="background:#0f6e5c;color:#fff;border:0;border-radius:6px;padding:.6rem 1.1rem;font:inherit;cursor:pointer">Sjekk</button>
+    </form>
+    <div id="liveRes" style="margin-top:.9rem"></div>
+  </section>
+
+  <div class="tabs" style="margin-top:1.2rem">
     <button class="tab active" data-tab="sammenligning">1. Før og etter</button>
     <button class="tab" data-tab="tiltak">2. Tiltak for kunden</button>
     <button class="tab" data-tab="tekst">3. Tekstforslag</button>
@@ -94,6 +105,43 @@
 </div>
 
 <script src="data/data.js"></script>
+<script>
+  // Live gratis-sjekk. Endepunktet ligger i ai-synlighet-pitch (Cloudflare Worker).
+  const LIVE_API = "https://ai-synlighet-pitch.lenkemotor.workers.dev/api/gratis";
+  (function () {
+    const form = document.getElementById("liveForm");
+    const out = document.getElementById("liveRes");
+    const btn = document.getElementById("liveBtn");
+    const txt = (tag, t, style) => { const n = document.createElement(tag); n.textContent = t; if (style) n.setAttribute("style", style); return n; };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = document.getElementById("liveUrl").value.trim();
+      const sted = document.getElementById("liveSted").value.trim();
+      btn.disabled = true; btn.textContent = "Sjekker …";
+      out.replaceChildren(txt("p", "Henter siden og sjekker …", "color:#666"));
+      try {
+        const r = await fetch(LIVE_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, sted }) });
+        const d = await r.json();
+        if (!r.ok || d.feil) throw new Error(d.feil || ("HTTP " + r.status));
+        out.replaceChildren(
+          txt("p", d.domene + " – score " + d.score + " / 100", "font-size:1.3rem;font-weight:700;color:#0f6e5c;margin:0 0 .4rem"),
+          ...d.sjekker.map(c => {
+            const row = document.createElement("div");
+            row.style.cssText = "border-bottom:1px solid #eee;padding:.45rem 0";
+            row.append(txt("div", (c.ok ? "✓ " : "! ") + c.navn + " (" + c.vekt + " p)", c.ok ? "color:#0f6e5c;font-weight:600" : "color:#b03a2e;font-weight:600"));
+            row.append(txt("div", "Funnet: " + c.funnet, "color:#444;font-size:.9rem"));
+            if (!c.ok) row.append(txt("div", "Dette gjør jeg: " + c.tiltak, "color:#444;font-size:.9rem"));
+            return row;
+          })
+        );
+      } catch (err) {
+        out.replaceChildren(txt("p", "Kunne ikke sjekke siden: " + err.message, "color:#b03a2e"));
+      } finally {
+        btn.disabled = false; btn.textContent = "Sjekk";
+      }
+    });
+  })();
+</script>
 <script>
   // Last AI-resultatene hvis de finnes (data/ai-sjekk.js genereres av analyzer/ai-sjekk.mjs)
   const aiScript = document.createElement("script");
