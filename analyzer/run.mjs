@@ -22,7 +22,7 @@ const resultater = versjoner.map(v => {
   if (v.ukjent) {
     r.points = r.points.map(p => v.ukjent.includes(p.label) ? { ...p, status: 'ukjent', value: 'Ikke verifisert' } : p);
   }
-  const ukjentPoeng = r.points.filter(p => p.status === 'ukjent').reduce((s, p) => s + p.points, 0);
+  const ukjentPoeng = r.points.filter(p => v.ukjent && v.ukjent.includes(p.label)).reduce((s, p) => s + p.points, 0);
   return {
     id: v.id, navn: v.navn, merk: v.merk || null,
     score: r.score, maxScore: r.maxScore - (v.ukjent ? ukjentPoeng : 0),

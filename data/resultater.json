@@ -1,12 +1,12 @@
 {
-  "generert": "2026-10-19T16:21:04.326Z",
+  "generert": "2026-10-19T16:22:02.469Z",
   "versjoner": [
     {
       "id": "original",
       "navn": "Original",
       "merk": "Basert på observert kildeinnhold. H1 og kontaktlenker er ikke verifisert og telles ikke.",
       "score": 8,
-      "maxScore": 28,
+      "maxScore": 58,
       "checks": [
         {
           "label": "Tittel",
