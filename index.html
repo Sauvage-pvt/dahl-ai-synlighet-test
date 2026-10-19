@@ -36,6 +36,11 @@
   button.copy { margin-top: .5rem; background: #0f6e5c; color: #fff; border: 0; border-radius: 6px; padding: .45rem .9rem; cursor: pointer; font: inherit; font-size: .9rem; }
   button.copy:active { opacity: .7; }
   a { color: #0f6e5c; }
+  @media print {
+    header, .live, .tabs, button.copy, #om, #ai, #tekst, #tiltak, #sammenligning { display: none !important; }
+    #rapport { display: block !important; box-shadow: none; }
+    body { background: #fff; }
+  }
   @media (max-width: 640px) { th, td { font-size: .85rem; padding: .4rem; } }
 </style>
 </head>
@@ -62,7 +67,8 @@
     <button class="tab" data-tab="tiltak">2. Tiltak for kunden</button>
     <button class="tab" data-tab="tekst">3. Tekstforslag</button>
     <button class="tab" data-tab="ai">4. AI-anbefalinger</button>
-    <button class="tab" data-tab="om">5. Om testen</button>
+    <button class="tab" data-tab="rapport">5. Kunderapport</button>
+    <button class="tab" data-tab="om">6. Om testen</button>
   </div>
 
   <!-- 1. Før og etter -->
@@ -93,7 +99,13 @@
     <div id="aiinnhold"><p class="note">Ikke kjørt ennå.</p></div>
   </div>
 
-  <!-- 5. Om -->
+  <!-- 5. Kunderapport (bygges fra siste live-sjekk) -->
+  <div id="rapport" class="panel">
+    <h2>Kunderapport</h2>
+    <div id="rapportinnhold"><p class="note">Kjør en sjekk i boksen øverst først. Rapporten bygges fra resultatet.</p></div>
+  </div>
+
+  <!-- 6. Om -->
   <div id="om" class="panel">
     <h2>Om testen</h2>
     <p><strong>Hva:</strong> Tre versjoner av samme side, sjekket med samme analysator. Den originale siden er i tillegg referanse.</p>
@@ -108,6 +120,56 @@
 <script>
   // Live gratis-sjekk. Endepunktet ligger i ai-synlighet-pitch (Cloudflare Worker).
   const LIVE_API = "https://ai-synlighet-pitch.lenkemotor.workers.dev/api/gratis";
+  function renderRapport() {
+    const box = document.getElementById("rapportinnhold");
+    const d = window.LAST_LIVE;
+    if (!d) return;
+    const el = (tag, t, cls) => { const n = document.createElement(tag); n.textContent = t; if (cls) n.className = cls; return n; };
+    const dato = d.tidspunkt.toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" });
+    const mangler = d.sjekker.filter(c => !c.ok);
+    const topp = mangler.slice(0, 4);
+    const stedTxt = d.sted ? " i " + d.sted : "";
+    const navn = d.navn || d.domene;
+    const liste = topp.map(c => "- " + c.navn + ": " + c.funnet).join("\n");
+    const tiltak = topp.map(c => "- " + c.tiltak).join("\n");
+    const forslag = "Hei! Jeg har sjekket nettsiden til " + navn + stedTxt + ".\n\n" +
+      "Nettsiden får " + d.score + " av 100 poeng for hvor godt Google og AI-søk (som ChatGPT) finner og forstår det dere tilbyr.\n\n" +
+      (mangler.length
+        ? "Det som trekker ned:\n" + liste + "\n\nDette kan jeg fikse:\n" + tiltak
+        : "Nettsiden er godt rigget for AI-søk allerede.") +
+      "\n\nVil dere ha en kort gjennomgang? Det tar cirka 15 minutter, og jeg viser konkrete tiltak dere kan velge mellom.\n\nMvh Per Dahl\n+47 934 46 590";
+
+    box.replaceChildren(
+      el("p", "Rapport for " + d.domene + " · " + dato, "note"),
+      el("div", d.score + " / 100", "score-stor"),
+      el("p", "Denne siden viser det som trekker ned poengene, og hva som kan gjøres. Den kan skrives ut eller kopieres."),
+      ...d.sjekker.map(c => {
+        const row = document.createElement("div");
+        row.style.cssText = "border-bottom:1px solid #eee;padding:.45rem 0";
+        row.append(el("div", (c.ok ? "✓ " : "! ") + c.navn + " (" + c.vekt + " p)", c.ok ? "ok" : "mangler"));
+        row.append(el("div", "Funnet: " + c.funnet, "note"));
+        if (!c.ok) row.append(el("div", "Tiltak: " + c.tiltak, "note"));
+        return row;
+      }),
+      el("h3", "Forslag til melding til kunden"),
+      el("pre", forslag)
+    );
+    const btns = document.createElement("div");
+    btns.style.cssText = "display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap";
+    const kopi = document.createElement("button");
+    kopi.className = "copy"; kopi.textContent = "Kopier meldingen";
+    kopi.onclick = async () => { try { await navigator.clipboard.writeText(forslag); } catch (e) {} kopi.textContent = "Kopiert ✓"; setTimeout(() => kopi.textContent = "Kopier meldingen", 1500); };
+    const skriv = document.createElement("button");
+    skriv.className = "copy"; skriv.textContent = "Skriv ut rapport";
+    skriv.onclick = () => {
+      document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === "rapport"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "rapport"));
+      window.print();
+    };
+    btns.append(kopi, skriv);
+    box.append(btns);
+  }
+
   (function () {
     const form = document.getElementById("liveForm");
     const out = document.getElementById("liveRes");
@@ -123,6 +185,8 @@
         const r = await fetch(LIVE_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, sted }) });
         const d = await r.json();
         if (!r.ok || d.feil) throw new Error(d.feil || ("HTTP " + r.status));
+        window.LAST_LIVE = { ...d, sted: sted, tidspunkt: new Date() };
+        renderRapport();
         out.replaceChildren(
           txt("p", d.domene + " – score " + d.score + " / 100", "font-size:1.3rem;font-weight:700;color:#0f6e5c;margin:0 0 .4rem"),
           ...d.sjekker.map(c => {
