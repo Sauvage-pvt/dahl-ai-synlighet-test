@@ -50,7 +50,8 @@
     <button class="tab active" data-tab="sammenligning">1. Før og etter</button>
     <button class="tab" data-tab="tiltak">2. Tiltak for kunden</button>
     <button class="tab" data-tab="tekst">3. Tekstforslag</button>
-    <button class="tab" data-tab="om">4. Om testen</button>
+    <button class="tab" data-tab="ai">4. AI-anbefalinger</button>
+    <button class="tab" data-tab="om">5. Om testen</button>
   </div>
 
   <!-- 1. Før og etter -->
@@ -74,7 +75,14 @@
     <div id="tekstliste"></div>
   </div>
 
-  <!-- 4. Om -->
+  <!-- 4. AI-anbefalinger -->
+  <div id="ai" class="panel">
+    <h2>AI-anbefalinger</h2>
+    <p>Spør ChatGPT om hvem den anbefaler i bransjen og på stedet, og sjekker om bedriften nevnes. Kjøres med <code>analyzer/ai-sjekk.mjs</code> (koster API-kall).</p>
+    <div id="aiinnhold"><p class="note">Ikke kjørt ennå.</p></div>
+  </div>
+
+  <!-- 5. Om -->
   <div id="om" class="panel">
     <h2>Om testen</h2>
     <p><strong>Hva:</strong> Tre versjoner av samme side, sjekket med samme analysator. Den originale siden er i tillegg referanse.</p>
@@ -86,6 +94,13 @@
 </div>
 
 <script src="data/data.js"></script>
+<script>
+  // Last AI-resultatene hvis de finnes (data/ai-sjekk.js genereres av analyzer/ai-sjekk.mjs)
+  const aiScript = document.createElement("script");
+  aiScript.src = "data/ai-sjekk.js";
+  aiScript.onload = () => renderAi();
+  document.head.append(aiScript);
+</script>
 <script>
   // ---- faner
   document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
@@ -209,6 +224,32 @@
     if (!fikset) kort.append(el('p', { class: 'note' }, 'Dette gir poeng når det er på plass og kan verifiseres.'));
     tiltakListe.append(kort);
   });
+
+  function renderAi() {
+    const box = document.getElementById("aiinnhold");
+    const d = window.AI_SJEKK;
+    if (!d) return;
+    box.innerHTML = "";
+    const f = (tag, txt, cls) => { const n = document.createElement(tag); n.textContent = txt; if (cls) n.className = cls; return n; };
+    box.append(f("p", "Nevnt i " + d.nevntAntall + " av " + d.totalt + " spørsmål (" + d.bransje + ", " + d.sted + ", " + d.domene + "). Modell: " + d.modell + ". Kjørt " + d.generert.slice(0, 10) + "."));
+    const tabell = document.createElement("table");
+    const hode = document.createElement("tr");
+    ["Spørsmål", "Nevnt?", "Plass"].forEach(t => hode.append(f("th", t)));
+    tabell.append(hode);
+    d.resultater.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.append(f("td", r.sporsmal), f("td", r.nevnt ? "Ja" : "Nei", r.nevnt ? "ok" : "mangler"), f("td", r.plass ? String(r.plass) : "–"));
+      tabell.append(tr);
+    });
+    box.append(tabell);
+    if (d.konkurrenter.length) {
+      box.append(f("h3", "Andre som nevnes oftest"));
+      const ul = document.createElement("ul");
+      d.konkurrenter.forEach(k => ul.append(f("li", k.navn + " (" + k.ganger + "×)")));
+      box.append(ul);
+    }
+    box.append(f("p", "Viktig: ChatGPT svarer ulikt fra gang til gang. Kjør flere ganger før du drar konklusjoner.", "note"));
+  }
 </script>
 </body>
 </html>
