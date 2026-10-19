@@ -1,0 +1,281 @@
+{
+  "generert": "2026-10-19T16:21:04.326Z",
+  "versjoner": [
+    {
+      "id": "original",
+      "navn": "Original",
+      "merk": "Basert på observert kildeinnhold. H1 og kontaktlenker er ikke verifisert og telles ikke.",
+      "score": 8,
+      "maxScore": 28,
+      "checks": [
+        {
+          "label": "Tittel",
+          "status": "ok",
+          "value": "På plass",
+          "points": 8
+        },
+        {
+          "label": "Meta-beskrivelse",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 10
+        },
+        {
+          "label": "H1",
+          "status": "ukjent",
+          "value": "Ikke verifisert",
+          "points": 6
+        },
+        {
+          "label": "Schema (JSON-LD)",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 12
+        },
+        {
+          "label": "Lokal schema (LocalBusiness el.)",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 15
+        },
+        {
+          "label": "Canonical",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 5
+        },
+        {
+          "label": "FAQ-schema",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 8
+        },
+        {
+          "label": "Kontakt (tel/mailto)",
+          "status": "ukjent",
+          "value": "Ikke verifisert",
+          "points": 6
+        },
+        {
+          "label": "llms.txt",
+          "status": "ukjent",
+          "value": "Ikke sjekket",
+          "points": 15
+        },
+        {
+          "label": "AI-boter tillatt (robots.txt)",
+          "status": "ukjent",
+          "value": "Ikke sjekket",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "v1",
+      "navn": "V1 – forbedret",
+      "merk": null,
+      "score": 62,
+      "maxScore": 85,
+      "checks": [
+        {
+          "label": "Tittel",
+          "status": "ok",
+          "value": "På plass",
+          "points": 8
+        },
+        {
+          "label": "Meta-beskrivelse",
+          "status": "ok",
+          "value": "På plass",
+          "points": 10
+        },
+        {
+          "label": "H1",
+          "status": "ok",
+          "value": "På plass",
+          "points": 6
+        },
+        {
+          "label": "Schema (JSON-LD)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 12
+        },
+        {
+          "label": "Lokal schema (LocalBusiness el.)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 15
+        },
+        {
+          "label": "Canonical",
+          "status": "ok",
+          "value": "På plass",
+          "points": 5
+        },
+        {
+          "label": "FAQ-schema",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 8
+        },
+        {
+          "label": "Kontakt (tel/mailto)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 6
+        },
+        {
+          "label": "llms.txt",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 15
+        },
+        {
+          "label": "AI-boter tillatt (robots.txt)",
+          "status": "ukjent",
+          "value": "Ikke sjekket",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "navn": "V2 – utvidet",
+      "merk": null,
+      "score": 62,
+      "maxScore": 85,
+      "checks": [
+        {
+          "label": "Tittel",
+          "status": "ok",
+          "value": "På plass",
+          "points": 8
+        },
+        {
+          "label": "Meta-beskrivelse",
+          "status": "ok",
+          "value": "På plass",
+          "points": 10
+        },
+        {
+          "label": "H1",
+          "status": "ok",
+          "value": "På plass",
+          "points": 6
+        },
+        {
+          "label": "Schema (JSON-LD)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 12
+        },
+        {
+          "label": "Lokal schema (LocalBusiness el.)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 15
+        },
+        {
+          "label": "Canonical",
+          "status": "ok",
+          "value": "På plass",
+          "points": 5
+        },
+        {
+          "label": "FAQ-schema",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 8
+        },
+        {
+          "label": "Kontakt (tel/mailto)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 6
+        },
+        {
+          "label": "llms.txt",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 15
+        },
+        {
+          "label": "AI-boter tillatt (robots.txt)",
+          "status": "ukjent",
+          "value": "Ikke sjekket",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "v3",
+      "navn": "V3 – ferdig",
+      "merk": "llms.txt må legges i rotmappen på nettstedet for å telle.",
+      "score": 70,
+      "maxScore": 85,
+      "checks": [
+        {
+          "label": "Tittel",
+          "status": "ok",
+          "value": "På plass",
+          "points": 8
+        },
+        {
+          "label": "Meta-beskrivelse",
+          "status": "ok",
+          "value": "På plass",
+          "points": 10
+        },
+        {
+          "label": "H1",
+          "status": "ok",
+          "value": "På plass",
+          "points": 6
+        },
+        {
+          "label": "Schema (JSON-LD)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 12
+        },
+        {
+          "label": "Lokal schema (LocalBusiness el.)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 15
+        },
+        {
+          "label": "Canonical",
+          "status": "ok",
+          "value": "På plass",
+          "points": 5
+        },
+        {
+          "label": "FAQ-schema",
+          "status": "ok",
+          "value": "På plass",
+          "points": 8
+        },
+        {
+          "label": "Kontakt (tel/mailto)",
+          "status": "ok",
+          "value": "På plass",
+          "points": 6
+        },
+        {
+          "label": "llms.txt",
+          "status": "mangler",
+          "value": "Mangler",
+          "points": 15
+        },
+        {
+          "label": "AI-boter tillatt (robots.txt)",
+          "status": "ukjent",
+          "value": "Ikke sjekket",
+          "points": 15
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-synlighet – Dahl-testene</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #fafafa; color: #1a1a1a; line-height: 1.55; }
+  header { background: #0f6e5c; color: #fff; padding: 1.2rem 1rem; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: .3rem 0 0; opacity: .9; font-size: .95rem; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+  .tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 0; }
+  .tab { padding: .6rem 1rem; background: #e6e6e6; border: 0; border-radius: 8px 8px 0 0; cursor: pointer; font: inherit; font-weight: 500; }
+  .tab.active { background: #fff; box-shadow: inset 0 -3px 0 #0f6e5c; }
+  .panel { display: none; background: #fff; border-radius: 0 8px 8px 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .panel.active { display: block; }
+  h2 { color: #0f6e5c; margin-top: 0; }
+  h3 { color: #0f6e5c; margin: 1.4rem 0 .4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { padding: .5rem .6rem; border-bottom: 1px solid #e5e5e5; text-align: left; vertical-align: top; }
+  th { background: #f4f7f6; }
+  td.num, th.num { text-align: center; white-space: nowrap; }
+  .ok { color: #0f6e5c; font-weight: 600; }
+  .mangler { color: #b03a2e; font-weight: 600; }
+  .ukjent { color: #888; font-style: italic; }
+  .score { font-size: 1.5rem; font-weight: 700; color: #0f6e5c; }
+  .note { font-size: .85rem; color: #666; margin-top: .6rem; }
+  .tiltak { border: 1px solid #e3e3e3; border-radius: 8px; padding: 1rem; margin-bottom: .9rem; }
+  .tiltak .pts { float: right; font-weight: 700; color: #0f6e5c; }
+  .tiltak p { margin: .3rem 0; }
+  .tekst { background: #f7f6f2; border-radius: 8px; padding: .8rem; margin: .6rem 0 1.2rem; }
+  .tekst .etikett { font-size: .85rem; color: #555; margin-bottom: .3rem; }
+  pre { white-space: pre-wrap; word-break: break-word; margin: 0; font: .9rem/1.45 ui-monospace, Menlo, Consolas, monospace; background: #fff; border: 1px solid #e3e3e3; border-radius: 6px; padding: .6rem; }
+  button.copy { margin-top: .5rem; background: #0f6e5c; color: #fff; border: 0; border-radius: 6px; padding: .45rem .9rem; cursor: pointer; font: inherit; font-size: .9rem; }
+  button.copy:active { opacity: .7; }
+  a { color: #0f6e5c; }
+  @media (max-width: 640px) { th, td { font-size: .85rem; padding: .4rem; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI-synlighet – Dahl-testene</h1>
+  <p>Hvordan siden til Per Dahl endrer seg fra første versjon til den ferdige, og hva andre bedrifter kan gjøre.</p>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" data-tab="sammenligning">1. Før og etter</button>
+    <button class="tab" data-tab="tiltak">2. Tiltak for kunden</button>
+    <button class="tab" data-tab="tekst">3. Tekstforslag</button>
+    <button class="tab" data-tab="om">4. Om testen</button>
+  </div>
+
+  <!-- 1. Før og etter -->
+  <div id="sammenligning" class="panel active">
+    <h2>Før og etter</h2>
+    <p>Samme analysator kjøres på hver versjon. Poengene er de som måles automatisk; det som ikke kan verifiseres vises som «ikke sjekket».</p>
+    <div id="tabell"></div>
+  </div>
+
+  <!-- 2. Tiltak -->
+  <div id="tiltak" class="panel">
+    <h2>Tiltak for kunden</h2>
+    <p>Dette er det som gir poeng i analysatoren og gjør siden lettere å finne for Google og AI-søk. Gjelder de fleste små bedriftssider.</p>
+    <div id="tiltakliste"></div>
+  </div>
+
+  <!-- 3. Tekstforslag -->
+  <div id="tekst" class="panel">
+    <h2>Tekstforslag</h2>
+    <p>Kopier rett inn. Bytt ut «Per Dahl», sted og tjenester for andre kunder.</p>
+    <div id="tekstliste"></div>
+  </div>
+
+  <!-- 4. Om -->
+  <div id="om" class="panel">
+    <h2>Om testen</h2>
+    <p><strong>Hva:</strong> Tre versjoner av samme side, sjekket med samme analysator. Den originale siden er i tillegg referanse.</p>
+    <p><strong>Analysator:</strong> <code>analyzer/analyze.js</code> sjekker tittel, meta-beskrivelse, H1, JSON-LD, lokal schema, canonical, FAQ-schema, kontaktlenker, llms.txt og robots.txt for AI-boter.</p>
+    <p><strong>Kjør på nytt:</strong> <code>node analyzer/run.mjs</code> oppdaterer <code>data/data.js</code>, som denne siden leser fra.</p>
+    <p><strong>Begrensning:</strong> Den originale siden kunne ikke hentes rå fra testmiljøet. Baseline er bygget fra observert innhold (tittel, manglende meta, canonical og JSON-LD). H1 og kontaktlenker er ikke verifisert og telles ikke.</p>
+    <p><strong>Mapper:</strong> <code>sider/</code> (versjonene og tekstfiler), <code>analyzer/</code>, <code>data/</code>, <code>eksempler/</code> (Per Frisør-testene).</p>
+  </div>
+</div>
+
+<script src="data/data.js"></script>
+<script>
+  // ---- faner
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  }));
+
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') n.className = v; else n.setAttribute(k, v);
+    }
+    for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(k));
+    return n;
+  };
+  const etikett = { ok: 'På plass', mangler: 'Mangler', ukjent: 'Ikke sjekket' };
+
+  // ---- 1. tabell
+  const V = DATA.versjoner;
+  const rader = V[0].checks.map((c, i) => {
+    const tr = el('tr', {}, el('td', {}, c.label), el('td', { class: 'num' }, `${c.points} p`));
+    V.forEach(v => {
+      const cc = v.checks[i];
+      tr.append(el('td', { class: 'num ' + cc.status }, etikett[cc.status]));
+    });
+    return tr;
+  });
+  const scoreRad = el('tr', {}, el('th', {}, 'Poeng'), el('th', { class: 'num' }, ''),
+    ...V.map(v => el('th', { class: 'num score' }, `${v.score}/${v.maxScore}`)));
+  const thead = el('tr', {}, el('th', {}, 'Sjekk'), el('th', { class: 'num' }, 'Verdi'),
+    ...V.map(v => el('th', { class: 'num' }, v.navn)));
+  const table = el('table', {}, el('thead', {}, thead), el('tbody', {}, ...rader, scoreRad));
+  document.getElementById('tabell').append(table);
+  const merk = V.filter(v => v.merk).map(v => `${v.navn}: ${v.merk}`);
+  document.getElementById('tabell').append(el('p', { class: 'note' },
+    'Viktigste endring: V2 fikk utvidet tekst og FAQ, men ingen av disse ga poeng fordi FAQ-skjemaet mangler. V3 retter det.'),
+    ...merk.map(m => el('p', { class: 'note' }, m)));
+
+  // ---- tekstforslag (én kilde, brukes både til visning og kopiering)
+  const TEKST = [
+    { tittel: 'Tittel (under 60 tegn)',
+      tekst: 'Per Dahl | Nettsider, AI-chat og AI-synlighet i Steinkjer' },
+    { tittel: 'Meta-beskrivelse (Google viser denne i søk)',
+      tekst: 'Per Dahl hjelper små bedrifter i Trøndelag med nettsider som tar imot kunder, AI-chat, booking og AI-synlighet. Få gratis analyse og konkrete tiltak.' },
+    { tittel: 'FAQ-svar – bruk samme tekst synlig på siden og i FAQPage-skjemaet',
+      tekst: 'Hva er AI-synlighet? Det handler om at bedriften din dukker opp når folk spør ChatGPT, Perplexity eller Google AI «hvem kan hjelpe meg med X i Trøndelag?».\n\nHva koster en analyse? Den første gjennomgangen er gratis. Deretter får du konkrete priser på det som trengs.' },
+    { tittel: 'llms.txt – legg i rotmappen på nettstedet (samme innhold som sider/llms.txt)',
+      tekst: '# Per Dahl – AI-synlighet og nettsider for små bedrifter\n\nPer Dahl i Steinkjer hjelper små bedrifter i Trøndelag med nettsider, AI-chat, booking, SEO/AI-synlighet og AI-telefonagent.\n\n## Område\nSteinkjer og Trøndelag, Norge.\n\n## Kontakt\nTelefon: +47 934 46 590\nE-post: pervdahl@gmail.com' },
+    { tittel: 'robots.txt – slipper AI-søk inn (legg i rotmappen)',
+      tekst: 'User-agent: GPTBot\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: *\nAllow: /' },
+    { tittel: 'Google Business Profile – beskrivelse',
+      tekst: 'Per Dahl hjelper små bedrifter i Steinkjer og Trøndelag med nettsider, AI-chat, online booking og AI-synlighet. Gratis analyse for å se hva som mangler.' },
+    { tittel: 'Be om anmeldelse – e-post (ferdig mal i sider/be-om-anmeldelse/)',
+      tekst: 'Emne: Takk for tilliten – vil du gi en kort anmeldelse?\n\nHei [Navn],\n\nTakk for at du brukte meg til [jobben].\n\nHvis du har et minutt, hadde det betydd mye om du kunne legge igjen en kort anmeldelse på Google:\n[Google-anmeldelse-lenke]\n\nTusen takk!\n\nPer Dahl' },
+  ];
+  const tekstListe = document.getElementById('tekstliste');
+  TEKST.forEach(t => {
+    const pre = el('pre', {}, t.tekst);
+    const btn = el('button', { class: 'copy', type: 'button' }, 'Kopier');
+    btn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(t.tekst); }
+      catch { const ta = el('textarea'); ta.value = t.tekst; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+      btn.textContent = 'Kopiert ✓'; setTimeout(() => btn.textContent = 'Kopier', 1500);
+    });
+    tekstListe.append(el('div', { class: 'tekst' }, el('div', { class: 'etikett' }, t.tittel), pre, btn));
+  });
+
+  // ---- 2. tiltak (knyttet til sjekkene)
+  const TILTAK = [
+    { sjekk: 'Tittel', poeng: 8, tittel: 'Tydelig tittel med tjeneste og sted',
+      hvorfor: 'Tittelen er det første Google og AI-søk leser. Den bør si hva du gjør og hvor.',
+      gjor: 'Bruk tekstforslaget under.', tekst: 0 },
+    { sjekk: 'Meta-beskrivelse', poeng: 10, tittel: 'Meta-beskrivelse på over 50 tegn',
+      hvorfor: 'Den vises i søkeresultatet og gir AI-søk en kort oppsummering av siden.',
+      gjor: 'Legg inn i <head>: <meta name="description" content="…">.', tekst: 1 },
+    { sjekk: 'Canonical', poeng: 5, tittel: 'Canonical-lenke',
+      hvorfor: 'Sier hvilken adresse som er den riktige, så samme side ikke telles flere ganger.',
+      gjor: 'Legg inn <link rel="canonical" href="…"> med den faste adressen.', tekst: null },
+    { sjekk: 'Schema (JSON-LD)', poeng: 12, tittel: 'Strukturerte data (JSON-LD)',
+      hvorfor: 'Gjør informasjonen om bedriften maskinlesbar for søkemotorer og AI.',
+      gjor: 'Legg inn JSON-LD i <head> med navn, telefon, adresse og tjenester.', tekst: null },
+    { sjekk: 'Lokal schema (LocalBusiness el.)', poeng: 15, tittel: 'Lokal schema (LocalBusiness / ProfessionalService)',
+      hvorfor: 'Kobler bedriften til sted og område. Dette er viktig for «hvem i Steinkjer» -søk.',
+      gjor: 'Bruk LocalBusiness eller ProfessionalService med adresse, postnummer og område.', tekst: null },
+    { sjekk: 'FAQ-schema', poeng: 8, tittel: 'FAQPage-schema for synlige spørsmål',
+      hvorfor: 'En FAQ i teksten hjelper ikke AI-søk før den er merket som FAQ. Det var nettopp dette V2 manglet.',
+      gjor: 'Lag JSON-LD med @type FAQPage, og bruk nøyaktig samme spørsmål og svar som står synlig.', tekst: 2 },
+    { sjekk: 'Kontakt (tel/mailto)', poeng: 6, tittel: 'Klikkbar kontakt',
+      hvorfor: 'Folk og AI-søk trenger en måte å ta kontakt på.',
+      gjor: 'Bruk <a href="tel:+47…"> og <a href="mailto:…">.', tekst: null },
+    { sjekk: 'H1', poeng: 6, tittel: 'Én H1 med tjeneste og sted',
+      hvorfor: 'H1 er sidens hovedtittel for leseren og søkemotoren.',
+      gjor: 'Én <h1> som sier hva du gjør og hvor, f.eks. «Nettsider og AI-chat i Steinkjer».', tekst: null },
+    { sjekk: 'llms.txt', poeng: 15, tittel: 'llms.txt i rotmappen',
+      hvorfor: 'En kort tekstfil som forteller AI-modeller hva bedriften tilbyr. Gir ekstra poeng i analysen.',
+      gjor: 'Legg filen i rotmappen (ikke i undermappe), slik at den er på /llms.txt.', tekst: 3 },
+    { sjekk: 'AI-boter tillatt (robots.txt)', poeng: 15, tittel: 'robots.txt som slipper inn AI-boter',
+      hvorfor: 'Blokkerer du GPTBot, ClaudeBot eller PerplexityBot, finnes du ikke i AI-søk.',
+      gjor: 'Sjekk robots.txt og fjern eventuelle «Disallow: /» for disse botene.', tekst: 4 },
+  ];
+
+  const siste = V[V.length - 1];
+  const tiltakListe = document.getElementById('tiltakliste');
+  TILTAK.forEach(t => {
+    const c = siste.checks.find(x => x.label === t.sjekk);
+    const status = c ? c.status : 'ukjent';
+    const fikset = status === 'ok';
+    const kort = el('div', { class: 'tiltak' },
+      el('span', { class: 'pts' }, `${t.poeng} p`),
+      el('h3', {}, t.tittel),
+      el('p', {}, el('strong', {}, 'Status i V3: '), el('span', { class: status }, etikett[status])),
+      el('p', {}, el('strong', {}, 'Hvorfor: '), t.hvorfor),
+      el('p', {}, el('strong', {}, 'Gjør slik: '), t.gjor),
+    );
+    if (t.tekst !== null) {
+      const tek = TEKST[t.tekst];
+      kort.append(el('div', { class: 'tekst' }, el('div', { class: 'etikett' }, 'Tekstforslag: ' + tek.tittel), el('pre', {}, tek.tekst)));
+    }
+    if (!fikset) kort.append(el('p', { class: 'note' }, 'Dette gir poeng når det er på plass og kan verifiseres.'));
+    tiltakListe.append(kort);
+  });
+</script>
+</body>
+</html>

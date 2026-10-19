@@ -1,26 +1,30 @@
-# Dahl AI-synlighet testversjoner
+# Dahl – AI-synlighet (testrepo)
 
-To testfiler for å sammenligne forbedringer på Per Dahl-siden ift. SEO og AI-synlighet.
+Ett sted for testene av AI-synlighet og nettside. Viser hvordan siden endrer seg fra første versjon til den ferdige, og hva som kan gjøres for kunden.
 
-## Filer
+## Åpne
+- `index.html` – fire faner: før og etter, tiltak for kunden, tekstforslag, om testen.
 
-- `dahl-v1-forbedret.html` – Versjon 1: Meta-beskrivelse, canonical, LocalBusiness/ProfessionalService schema, tydelig kontaktinfo.
-- `dahl-v2-utvidet.html` – Versjon 2: Alt i v1 + FAQ-seksjon, mer detaljert schema (geo, postnummer), sterkere lokal tekst.
-- `llms.txt` – Forslag til fil som AI-modeller kan lese.
+## Innhold
+- `sider/` – versjonene som testes
+  - `1-v1-forbedret.html` – første forbedring
+  - `2-v2-utvidet.html` – utvidet med FAQ (uten FAQPage-skjema)
+  - `3-ferdig.html` – ferdig versjon: FAQPage-skjema og lenke til llms.txt
+  - `llms.txt` – må ligge i rotmappen på nettstedet
+  - `be-om-anmeldelse/`, `priser-google-tripadvisor.md` – støttemateriell
+- `data/original-observert.html` – baseline for den originale siden (bygget fra observert innhold, se begrensning under)
+- `analyzer/analyze.js` – analysator (også Cloudflare Worker, `POST /analyze`)
+- `analyzer/run.mjs` – kjører analysatoren på alle versjonene og skriver `data/data.js`
+- `eksempler/` – Per Frisør-testene (eget kundeeksempel)
 
-## Original
-Original side: https://bedriftssok.lenkemotor.workers.dev/dahl
+## Kjør på nytt
+```
+node analyzer/run.mjs
+```
+Oppdaterer `data/data.js`, som `index.html` leser fra.
 
-## Hva er forbedret (begge versjoner)
-- Meta description (manglet helt)
-- Canonical
-- Strukturerte data (schema.org)
-- Tydelig telefon og sted i klartekst
-- (v2) FAQ som AI lett kan sitere
+## Begrensning
+Den originale siden (`bedriftssok.lenkemotor.workers.dev/dahl`) kunne ikke hentes rå fra testmiljøet. Baseline er bygget fra observert innhold: tittel, manglende meta-beskrivelse, canonical og JSON-LD. H1 og kontaktlenker er ikke verifisert og telles ikke i den originale versjonen.
 
-## Sammenligning
-1. Original: https://bedriftssok.lenkemotor.workers.dev/dahl
-2. V1: Åpne `dahl-v1-forbedret.html` lokalt eller host den
-3. V2: Åpne `dahl-v2-utvidet.html`
-
-Kjør analyseverktøyet på alle tre for å se forskjellen.
+## Deploy
+Cloudflare Pages/Workers. For at llms.txt skal telle, må `sider/llms.txt` ligge i rotmappen på det publiserte nettstedet.
