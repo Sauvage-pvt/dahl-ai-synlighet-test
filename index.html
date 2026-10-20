@@ -37,6 +37,7 @@
   button.copy:active { opacity: .7; }
   a { color: #0f6e5c; }
   @media print {
+    #bransjekart { display: none !important; }
     header, .live, .tabs, button.copy, #om, #ai, #tekst, #tiltak, #sammenligning { display: none !important; }
     #rapport { display: block !important; box-shadow: none; }
     body { background: #fff; }
@@ -68,7 +69,8 @@
     <button class="tab" data-tab="tekst">3. Tekstforslag</button>
     <button class="tab" data-tab="ai">4. AI-anbefalinger</button>
     <button class="tab" data-tab="rapport">5. Kunderapport</button>
-    <button class="tab" data-tab="om">6. Om testen</button>
+    <button class="tab" data-tab="bransjekart">6. Bransjekart</button>
+    <button class="tab" data-tab="om">7. Om testen</button>
   </div>
 
   <!-- 1. Før og etter -->
@@ -105,7 +107,22 @@
     <div id="rapportinnhold"><p class="note">Kjør en sjekk i boksen øverst først. Rapporten bygges fra resultatet.</p></div>
   </div>
 
-  <!-- 6. Om -->
+  <!-- 6. Bransjekart (anonym: bare bransje og sted) -->
+  <div id="bransjekart" class="panel">
+    <h2>Bransjekart</h2>
+    <p>Se hvor bedriftene i en bransje ligger i et sted, og hvor mange anmeldelser de har. Ingen adresse eller kundeinfo trengs.</p>
+    <form id="bkForm" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end;margin-bottom:1rem">
+      <label style="flex:1 1 200px">Bransje<br><input id="bkBransje" placeholder="f.eks. rørlegger" required style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <label style="flex:1 1 160px">Sted<br><input id="bkSted" placeholder="f.eks. Steinkjer" required style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <button id="bkBtn" type="submit" class="copy" style="margin:0">Vis</button>
+    </form>
+    <div id="bkStatus" class="note"></div>
+    <div id="bkMap" style="height:360px;border-radius:8px;margin:.6rem 0;display:none"></div>
+    <div id="bkListe"></div>
+    <p class="note">Data: Google Maps / Google Places. Kun antall og snittkarakter vises.</p>
+  </div>
+
+  <!-- 7. Om -->
   <div id="om" class="panel">
     <h2>Om testen</h2>
     <p><strong>Hva:</strong> Tre versjoner av samme side, sjekket med samme analysator. Den originale siden er i tillegg referanse.</p>
@@ -116,6 +133,8 @@
   </div>
 </div>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="data/data.js"></script>
 <script>
   // Live gratis-sjekk. Endepunktet ligger i ai-synlighet-pitch (Cloudflare Worker).
@@ -169,6 +188,58 @@
     btns.append(kopi, skriv);
     box.append(btns);
   }
+
+  // ---- Bransjekart
+  (function () {
+    const BRANSJE_API = "https://ai-synlighet-pitch.lenkemotor.workers.dev/api/bransje";
+    const form = document.getElementById("bkForm");
+    const status = document.getElementById("bkStatus");
+    const liste = document.getElementById("bkListe");
+    const kart = document.getElementById("bkMap");
+    const btn = document.getElementById("bkBtn");
+    let map = null, lag = null;
+    const txt = (tag, t, style) => { const n = document.createElement(tag); n.textContent = t; if (style) n.setAttribute("style", style); return n; };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const bransje = document.getElementById("bkBransje").value.trim();
+      const sted = document.getElementById("bkSted").value.trim();
+      btn.disabled = true; status.textContent = "Søker …"; liste.replaceChildren();
+      try {
+        const r = await fetch(BRANSJE_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ bransje, sted }) });
+        const d = await r.json();
+        if (!r.ok || d.feil) throw new Error(d.feil || ("HTTP " + r.status));
+        status.textContent = d.antall + " bedrifter funnet for " + d.bransje + " i " + d.sted + ".";
+
+        kart.style.display = "block";
+        if (!map) { map = L.map(kart); L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map); }
+        if (lag) lag.remove();
+        lag = L.layerGroup().addTo(map);
+        const punkter = d.bedrifter.filter(b => b.lat != null && b.lng != null);
+        punkter.forEach(b => {
+          L.circleMarker([b.lat, b.lng], { radius: 8, color: "#0f6e5c", fillColor: "#0f6e5c", fillOpacity: .7 })
+            .bindTooltip(b.navn + " · " + (b.snitt ?? "–") + " ★ · " + b.antall + " anm.")
+            .addTo(lag);
+        });
+        if (punkter.length) map.fitBounds(L.latLngBounds(punkter.map(b => [b.lat, b.lng])), { padding: [20, 20] });
+
+        const tabell = document.createElement("table");
+        const hode = document.createElement("tr");
+        ["Bedrift", "Anmeldelser", "Snitt"].forEach(t => hode.append(txt("th", t)));
+        tabell.append(hode);
+        d.bedrifter.forEach(b => {
+          const tr = document.createElement("tr");
+          tr.append(txt("td", b.navn), txt("td", String(b.antall)), txt("td", b.snitt != null ? b.snitt.toFixed(1) : "–"));
+          tabell.append(tr);
+        });
+        liste.append(tabell);
+      } catch (err) {
+        status.textContent = "Kunne ikke hente bransjekartet: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
 
   (function () {
     const form = document.getElementById("liveForm");
