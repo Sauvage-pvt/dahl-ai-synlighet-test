@@ -4,10 +4,435 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI-synlighet – Dahl-testene</title>
-<!-- Full original content restored. See commit history for complete version if this is truncated. -->
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #fafafa; color: #1a1a1a; line-height: 1.55; }
+  header { background: #0f6e5c; color: #fff; padding: 1.2rem 1rem; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: .3rem 0 0; opacity: .9; font-size: .95rem; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+  .tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 0; }
+  .tab { padding: .6rem 1rem; background: #e6e6e6; border: 0; border-radius: 8px 8px 0 0; cursor: pointer; font: inherit; font-weight: 500; }
+  .tab.active { background: #fff; box-shadow: inset 0 -3px 0 #0f6e5c; }
+  .panel { display: none; background: #fff; border-radius: 0 8px 8px 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .panel.active { display: block; }
+  h2 { color: #0f6e5c; margin-top: 0; }
+  h3 { color: #0f6e5c; margin: 1.4rem 0 .4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { padding: .5rem .6rem; border-bottom: 1px solid #e5e5e5; text-align: left; vertical-align: top; }
+  th { background: #f4f7f6; }
+  td.num, th.num { text-align: center; white-space: nowrap; }
+  .ok { color: #0f6e5c; font-weight: 600; }
+  .mangler { color: #b03a2e; font-weight: 600; }
+  .ukjent { color: #888; font-style: italic; }
+  .score { font-size: 1.5rem; font-weight: 700; color: #0f6e5c; }
+  .note { font-size: .85rem; color: #666; margin-top: .6rem; }
+  .tiltak { border: 1px solid #e3e3e3; border-radius: 8px; padding: 1rem; margin-bottom: .9rem; }
+  .tiltak .pts { float: right; font-weight: 700; color: #0f6e5c; }
+  .tiltak p { margin: .3rem 0; }
+  .tekst { background: #f7f6f2; border-radius: 8px; padding: .8rem; margin: .6rem 0 1.2rem; }
+  .tekst .etikett { font-size: .85rem; color: #555; margin-bottom: .3rem; }
+  pre { white-space: pre-wrap; word-break: break-word; margin: 0; font: .9rem/1.45 ui-monospace, Menlo, Consolas, monospace; background: #fff; border: 1px solid #e3e3e3; border-radius: 6px; padding: .6rem; }
+  button.copy { margin-top: .5rem; background: #0f6e5c; color: #fff; border: 0; border-radius: 6px; padding: .45rem .9rem; cursor: pointer; font: inherit; font-size: .9rem; }
+  button.copy:active { opacity: .7; }
+  a { color: #0f6e5c; }
+  @media print {
+    #bransjekart { display: none !important; }
+    header, .live, .tabs, button.copy, #om, #ai, #tekst, #tiltak, #sammenligning { display: none !important; }
+    #rapport { display: block !important; box-shadow: none; }
+    body { background: #fff; }
+  }
+  @media (max-width: 640px) { th, td { font-size: .85rem; padding: .4rem; } }
+</style>
 </head>
 <body>
-<p>Hovedsiden gjenopprettes. Hvis denne meldingen vises, last inn på nytt om noen minutter eller sjekk GitHub-historikken.</p>
-<a href="/score-forbedringer.html">Gå til score-forbedringer</a>
+<header>
+  <h1>AI-synlighet – Dahl-testene</h1>
+  <p>Hvordan siden til Per Dahl endrer seg fra første versjon til den ferdige, og hva andre bedrifter kan gjøre.</p>
+</header>
+
+<div class="wrap">
+  <section class="live" style="background:#fff;border-radius:8px;padding:1.1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-top:1rem">
+    <h2 style="color:#0f6e5c;margin:0 0 .4rem">Test en kundes side nå</h2>
+    <p class="note" style="margin:0 0 .7rem">Skriv inn adressen og trykk Sjekk. Analysen kjøres live mot nettsiden til kunden.</p>
+    <form id="liveForm" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end">
+      <label style="flex:2 1 260px">Nettside<br><input id="liveUrl" placeholder="f.eks. bedrift.no" required style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <label style="flex:1 1 140px">Sted<br><input id="liveSted" placeholder="f.eks. Steinkjer" style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <button id="liveBtn" type="submit" style="background:#0f6e5c;color:#fff;border:0;border-radius:6px;padding:.6rem 1.1rem;font:inherit;cursor:pointer">Sjekk</button>
+    </form>
+    <div id="liveRes" style="margin-top:.9rem"></div>
+  </section>
+
+  <div class="tabs" style="margin-top:1.2rem">
+    <button class="tab active" data-tab="sammenligning">1. Før og etter</button>
+    <button class="tab" data-tab="tiltak">2. Tiltak for kunden</button>
+    <button class="tab" data-tab="tekst">3. Tekstforslag</button>
+    <button class="tab" data-tab="ai">4. AI-anbefalinger</button>
+    <button class="tab" data-tab="rapport">5. Kunderapport</button>
+    <button class="tab" data-tab="bransjekart">6. Bransjekart</button>
+    <button class="tab" data-tab="om">7. Om testen</button>
+  </div>
+
+  <!-- 1. Før og etter -->
+  <div id="sammenligning" class="panel active">
+    <h2>Før og etter</h2>
+    <p>Samme analysator kjøres på hver versjon. Poengene er de som måles automatisk; det som ikke kan verifiseres vises som «ikke sjekket».</p>
+    <div id="tabell"></div>
+  </div>
+
+  <!-- 2. Tiltak -->
+  <div id="tiltak" class="panel">
+    <h2>Tiltak for kunden</h2>
+    <p>Dette er det som gir poeng i analysatoren og gjør siden lettere å finne for Google og AI-søk. Gjelder de fleste små bedriftssider.</p>
+    <div id="tiltakliste"></div>
+  </div>
+
+  <!-- 3. Tekstforslag -->
+  <div id="tekst" class="panel">
+    <h2>Tekstforslag</h2>
+    <p>Kopier rett inn. Bytt ut «Per Dahl», sted og tjenester for andre kunder.</p>
+    <div id="tekstliste"></div>
+  </div>
+
+  <!-- 4. AI-anbefalinger -->
+  <div id="ai" class="panel">
+    <h2>AI-anbefalinger</h2>
+    <p>Spør ChatGPT om hvem den anbefaler i bransjen og på stedet, og sjekker om bedriften nevnes. Kjøres med <code>analyzer/ai-sjekk.mjs</code> (koster API-kall).</p>
+    <div id="aiinnhold"><p class="note">Ikke kjørt ennå.</p></div>
+  </div>
+
+  <!-- 5. Kunderapport (bygges fra siste live-sjekk) -->
+  <div id="rapport" class="panel">
+    <h2>Kunderapport</h2>
+    <div id="rapportinnhold"><p class="note">Kjør en sjekk i boksen øverst først. Rapporten bygges fra resultatet.</p></div>
+  </div>
+
+  <!-- 6. Bransjekart (anonym: bare bransje og sted) -->
+  <div id="bransjekart" class="panel">
+    <h2>Bransjekart</h2>
+    <p>Se hvor bedriftene i en bransje ligger i et sted, og hvor mange anmeldelser de har. Ingen adresse eller kundeinfo trengs.</p>
+    <form id="bkForm" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end;margin-bottom:1rem">
+      <label style="flex:1 1 200px">Bransje<br><input id="bkBransje" placeholder="f.eks. rørlegger" required style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <label style="flex:1 1 160px">Sted<br><input id="bkSted" placeholder="f.eks. Steinkjer" required style="width:100%;padding:.55rem;border:1px solid #ccc;border-radius:6px;font:inherit"></label>
+      <button id="bkBtn" type="submit" class="copy" style="margin:0">Vis</button>
+    </form>
+    <div id="bkStatus" class="note"></div>
+    <div id="bkMap" style="height:360px;border-radius:8px;margin:.6rem 0;display:none"></div>
+    <div id="bkListe"></div>
+    <p class="note">Data: Google Maps / Google Places. Kun antall og snittkarakter vises.</p>
+  </div>
+
+  <!-- 7. Om -->
+  <div id="om" class="panel">
+    <h2>Om testen</h2>
+    <p><strong>Hva:</strong> Tre versjoner av samme side, sjekket med samme analysator. Den originale siden er i tillegg referanse.</p>
+    <p><strong>Analysator:</strong> <code>analyzer/analyze.js</code> sjekker tittel, meta-beskrivelse, H1, JSON-LD, lokal schema, canonical, FAQ-schema, kontaktlenker, llms.txt og robots.txt for AI-boter.</p>
+    <p><strong>Kjør på nytt:</strong> <code>node analyzer/run.mjs</code> oppdaterer <code>data/data.js</code>, som denne siden leser fra.</p>
+    <p><strong>Begrensning:</strong> Den originale siden kunne ikke hentes rå fra testmiljøet. Baseline er bygget fra observert innhold (tittel, manglende meta, canonical og JSON-LD). H1 og kontaktlenker er ikke verifisert og telles ikke.</p>
+    <p><strong>Mapper:</strong> <code>sider/</code> (versjonene og tekstfiler), <code>analyzer/</code>, <code>data/</code>, <code>eksempler/</code> (Per Frisør-testene).</p>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="data/data.js"></script>
+<script>
+  // Live gratis-sjekk. Endepunktet ligger i ai-synlighet-pitch (Cloudflare Worker).
+  const LIVE_API = "https://ai-synlighet-pitch.lenkemotor.workers.dev/api/gratis";
+  function renderRapport() {
+    const box = document.getElementById("rapportinnhold");
+    const d = window.LAST_LIVE;
+    if (!d) return;
+    const el = (tag, t, cls) => { const n = document.createElement(tag); n.textContent = t; if (cls) n.className = cls; return n; };
+    const dato = d.tidspunkt.toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" });
+    const mangler = d.sjekker.filter(c => !c.ok);
+    const topp = mangler.slice(0, 4);
+    const stedTxt = d.sted ? " i " + d.sted : "";
+    const navn = d.navn || d.domene;
+    const liste = topp.map(c => "- " + c.navn + ": " + c.funnet).join("\n");
+    const tiltak = topp.map(c => "- " + c.tiltak).join("\n");
+    const forslag = "Hei! Jeg har sjekket nettsiden til " + navn + stedTxt + ".\n\n" +
+      "Nettsiden får " + d.score + " av 100 poeng for hvor godt Google og AI-søk (som ChatGPT) finner og forstår det dere tilbyr.\n\n" +
+      (mangler.length
+        ? "Det som trekker ned:\n" + liste + "\n\nDette kan jeg fikse:\n" + tiltak
+        : "Nettsiden er godt rigget for AI-søk allerede.") +
+      "\n\nVil dere ha en kort gjennomgang? Det tar cirka 15 minutter, og jeg viser konkrete tiltak dere kan velge mellom.\n\nMvh Per Dahl\n+47 934 46 590";
+
+    box.replaceChildren(
+      el("p", "Rapport for " + d.domene + " · " + dato, "note"),
+      el("div", d.score + " / 100", "score-stor"),
+      el("p", "Denne siden viser det som trekker ned poengene, og hva som kan gjøres. Den kan skrives ut eller kopieres."),
+      ...d.sjekker.map(c => {
+        const row = document.createElement("div");
+        row.style.cssText = "border-bottom:1px solid #eee;padding:.45rem 0";
+        row.append(el("div", (c.ok ? "✓ " : "! ") + c.navn + " (" + c.vekt + " p)", c.ok ? "ok" : "mangler"));
+        row.append(el("div", "Funnet: " + c.funnet, "note"));
+        if (!c.ok) row.append(el("div", "Tiltak: " + c.tiltak, "note"));
+        return row;
+      }),
+      el("h3", "Forslag til melding til kunden"),
+      el("pre", forslag)
+    );
+    const btns = document.createElement("div");
+    btns.style.cssText = "display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap";
+    const kopi = document.createElement("button");
+    kopi.className = "copy"; kopi.textContent = "Kopier meldingen";
+    kopi.onclick = async () => { try { await navigator.clipboard.writeText(forslag); } catch (e) {} kopi.textContent = "Kopiert ✓"; setTimeout(() => kopi.textContent = "Kopier meldingen", 1500); };
+    const skriv = document.createElement("button");
+    skriv.className = "copy"; skriv.textContent = "Skriv ut rapport";
+    skriv.onclick = () => {
+      document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === "rapport"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "rapport"));
+      window.print();
+    };
+    btns.append(kopi, skriv);
+    box.append(btns);
+  }
+
+  // ---- Bransjekart
+  (function () {
+    const BRANSJE_API = "https://ai-synlighet-pitch.lenkemotor.workers.dev/api/bransje";
+    const form = document.getElementById("bkForm");
+    const status = document.getElementById("bkStatus");
+    const liste = document.getElementById("bkListe");
+    const kart = document.getElementById("bkMap");
+    const btn = document.getElementById("bkBtn");
+    let map = null, lag = null;
+    const txt = (tag, t, style) => { const n = document.createElement(tag); n.textContent = t; if (style) n.setAttribute("style", style); return n; };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const bransje = document.getElementById("bkBransje").value.trim();
+      const sted = document.getElementById("bkSted").value.trim();
+      btn.disabled = true; status.textContent = "Søker …"; liste.replaceChildren();
+      try {
+        const r = await fetch(BRANSJE_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ bransje, sted }) });
+        const d = await r.json();
+        if (!r.ok || d.feil) throw new Error(d.feil || ("HTTP " + r.status));
+        status.textContent = d.antall + " bedrifter funnet for " + d.bransje + " i " + d.sted + ".";
+
+        kart.style.display = "block";
+        if (!map) { map = L.map(kart); L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map); }
+        if (lag) lag.remove();
+        lag = L.layerGroup().addTo(map);
+        const punkter = d.bedrifter.filter(b => b.lat != null && b.lng != null);
+        punkter.forEach(b => {
+          L.circleMarker([b.lat, b.lng], { radius: 8, color: "#0f6e5c", fillColor: "#0f6e5c", fillOpacity: .7 })
+            .bindTooltip(b.navn + " · " + (b.snitt ?? "–") + " ★ · " + b.antall + " anm.")
+            .addTo(lag);
+        });
+        if (punkter.length) map.fitBounds(L.latLngBounds(punkter.map(b => [b.lat, b.lng])), { padding: [20, 20] });
+
+        const tabell = document.createElement("table");
+        const hode = document.createElement("tr");
+        ["Bedrift", "Anmeldelser", "Snitt"].forEach(t => hode.append(txt("th", t)));
+        tabell.append(hode);
+        d.bedrifter.forEach(b => {
+          const tr = document.createElement("tr");
+          tr.append(txt("td", b.navn), txt("td", String(b.antall)), txt("td", b.snitt != null ? b.snitt.toFixed(1) : "–"));
+          tabell.append(tr);
+        });
+        liste.append(tabell);
+      } catch (err) {
+        status.textContent = "Kunne ikke hente bransjekartet: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+
+  (function () {
+    const form = document.getElementById("liveForm");
+    const out = document.getElementById("liveRes");
+    const btn = document.getElementById("liveBtn");
+    const txt = (tag, t, style) => { const n = document.createElement(tag); n.textContent = t; if (style) n.setAttribute("style", style); return n; };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = document.getElementById("liveUrl").value.trim();
+      const sted = document.getElementById("liveSted").value.trim();
+      btn.disabled = true; btn.textContent = "Sjekker …";
+      out.replaceChildren(txt("p", "Henter siden og sjekker …", "color:#666"));
+      try {
+        const r = await fetch(LIVE_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, sted }) });
+        const d = await r.json();
+        if (!r.ok || d.feil) throw new Error(d.feil || ("HTTP " + r.status));
+        window.LAST_LIVE = { ...d, sted: sted, tidspunkt: new Date() };
+        renderRapport();
+        out.replaceChildren(
+          txt("p", d.domene + " – score " + d.score + " / 100", "font-size:1.3rem;font-weight:700;color:#0f6e5c;margin:0 0 .4rem"),
+          ...d.sjekker.map(c => {
+            const row = document.createElement("div");
+            row.style.cssText = "border-bottom:1px solid #eee;padding:.45rem 0";
+            row.append(txt("div", (c.ok ? "✓ " : "! ") + c.navn + " (" + c.vekt + " p)", c.ok ? "color:#0f6e5c;font-weight:600" : "color:#b03a2e;font-weight:600"));
+            row.append(txt("div", "Funnet: " + c.funnet, "color:#444;font-size:.9rem"));
+            if (!c.ok) row.append(txt("div", "Dette gjør jeg: " + c.tiltak, "color:#444;font-size:.9rem"));
+            return row;
+          })
+        );
+      } catch (err) {
+        out.replaceChildren(txt("p", "Kunne ikke sjekke siden: " + err.message, "color:#b03a2e"));
+      } finally {
+        btn.disabled = false; btn.textContent = "Sjekk";
+      }
+    });
+  })();
+</script>
+<script>
+  // Last AI-resultatene hvis de finnes (data/ai-sjekk.js genereres av analyzer/ai-sjekk.mjs)
+  const aiScript = document.createElement("script");
+  aiScript.src = "data/ai-sjekk.js";
+  aiScript.onload = () => renderAi();
+  document.head.append(aiScript);
+</script>
+<script>
+  // ---- faner
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  }));
+
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') n.className = v; else n.setAttribute(k, v);
+    }
+    for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(k));
+    return n;
+  };
+  const etikett = { ok: 'På plass', mangler: 'Mangler', ukjent: 'Ikke sjekket' };
+
+  // ---- 1. tabell
+  const V = DATA.versjoner;
+  const rader = V[0].checks.map((c, i) => {
+    const tr = el('tr', {}, el('td', {}, c.label), el('td', { class: 'num' }, `${c.points} p`));
+    V.forEach(v => {
+      const cc = v.checks[i];
+      tr.append(el('td', { class: 'num ' + cc.status }, etikett[cc.status]));
+    });
+    return tr;
+  });
+  const scoreRad = el('tr', {}, el('th', {}, 'Poeng'), el('th', { class: 'num' }, ''),
+    ...V.map(v => el('th', { class: 'num score' }, `${v.score}/${v.maxScore}`)));
+  const thead = el('tr', {}, el('th', {}, 'Sjekk'), el('th', { class: 'num' }, 'Verdi'),
+    ...V.map(v => el('th', { class: 'num' }, v.navn)));
+  const table = el('table', {}, el('thead', {}, thead), el('tbody', {}, ...rader, scoreRad));
+  document.getElementById('tabell').append(table);
+  const merk = V.filter(v => v.merk).map(v => `${v.navn}: ${v.merk}`);
+  document.getElementById('tabell').append(el('p', { class: 'note' },
+    'Viktigste endring: V2 fikk utvidet tekst og FAQ, men ingen av disse ga poeng fordi FAQ-skjemaet mangler. V3 retter det.'),
+    ...merk.map(m => el('p', { class: 'note' }, m)));
+
+  // ---- tekstforslag (én kilde, brukes både til visning og kopiering)
+  const TEKST = [
+    { tittel: 'Tittel (under 60 tegn)',
+      tekst: 'Per Dahl | Nettsider, AI-chat og AI-synlighet i Steinkjer' },
+    { tittel: 'Meta-beskrivelse (Google viser denne i søk)',
+      tekst: 'Per Dahl hjelper små bedrifter i Trøndelag med nettsider som tar imot kunder, AI-chat, booking og AI-synlighet. Få gratis analyse og konkrete tiltak.' },
+    { tittel: 'FAQ-svar – bruk samme tekst synlig på siden og i FAQPage-skjemaet',
+      tekst: 'Hva er AI-synlighet? Det handler om at bedriften din dukker opp når folk spør ChatGPT, Perplexity eller Google AI «hvem kan hjelpe meg med X i Trøndelag?».\n\nHva koster en analyse? Den første gjennomgangen er gratis. Deretter får du konkrete priser på det som trengs.' },
+    { tittel: 'llms.txt – legg i rotmappen på nettstedet (samme innhold som sider/llms.txt)',
+      tekst: '# Per Dahl – AI-synlighet og nettsider for små bedrifter\n\nPer Dahl i Steinkjer hjelper små bedrifter i Trøndelag med nettsider, AI-chat, booking, SEO/AI-synlighet og AI-telefonagent.\n\n## Område\nSteinkjer og Trøndelag, Norge.\n\n## Kontakt\nTelefon: +47 934 46 590\nE-post: pervdahl@gmail.com' },
+    { tittel: 'robots.txt – slipper AI-søk inn (legg i rotmappen)',
+      tekst: 'User-agent: GPTBot\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: *\nAllow: /' },
+    { tittel: 'Google Business Profile – beskrivelse',
+      tekst: 'Per Dahl hjelper små bedrifter i Steinkjer og Trøndelag med nettsider, AI-chat, online booking og AI-synlighet. Gratis analyse for å se hva som mangler.' },
+    { tittel: 'Be om anmeldelse – e-post (ferdig mal i sider/be-om-anmeldelse/)',
+      tekst: 'Emne: Takk for tilliten – vil du gi en kort anmeldelse?\n\nHei [Navn],\n\nTakk for at du brukte meg til [jobben].\n\nHvis du har et minutt, hadde det betydd mye om du kunne legge igjen en kort anmeldelse på Google:\n[Google-anmeldelse-lenke]\n\nTusen takk!\n\nPer Dahl' },
+  ];
+  const tekstListe = document.getElementById('tekstliste');
+  TEKST.forEach(t => {
+    const pre = el('pre', {}, t.tekst);
+    const btn = el('button', { class: 'copy', type: 'button' }, 'Kopier');
+    btn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(t.tekst); }
+      catch { const ta = el('textarea'); ta.value = t.tekst; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+      btn.textContent = 'Kopiert ✓'; setTimeout(() => btn.textContent = 'Kopier', 1500);
+    });
+    tekstListe.append(el('div', { class: 'tekst' }, el('div', { class: 'etikett' }, t.tittel), pre, btn));
+  });
+
+  // ---- 2. tiltak (knyttet til sjekkene)
+  const TILTAK = [
+    { sjekk: 'Tittel', poeng: 8, tittel: 'Tydelig tittel med tjeneste og sted',
+      hvorfor: 'Tittelen er det første Google og AI-søk leser. Den bør si hva du gjør og hvor.',
+      gjor: 'Bruk tekstforslaget under.', tekst: 0 },
+    { sjekk: 'Meta-beskrivelse', poeng: 10, tittel: 'Meta-beskrivelse på over 50 tegn',
+      hvorfor: 'Den vises i søkeresultatet og gir AI-søk en kort oppsummering av siden.',
+      gjor: 'Legg inn i <head>: <meta name="description" content="…">.', tekst: 1 },
+    { sjekk: 'Canonical', poeng: 5, tittel: 'Canonical-lenke',
+      hvorfor: 'Sier hvilken adresse som er den riktige, så samme side ikke telles flere ganger.',
+      gjor: 'Legg inn <link rel="canonical" href="…"> med den faste adressen.', tekst: null },
+    { sjekk: 'Schema (JSON-LD)', poeng: 12, tittel: 'Strukturerte data (JSON-LD)',
+      hvorfor: 'Gjør informasjonen om bedriften maskinlesbar for søkemotorer og AI.',
+      gjor: 'Legg inn JSON-LD i <head> med navn, telefon, adresse og tjenester.', tekst: null },
+    { sjekk: 'Lokal schema (LocalBusiness el.)', poeng: 15, tittel: 'Lokal schema (LocalBusiness / ProfessionalService)',
+      hvorfor: 'Kobler bedriften til sted og område. Dette er viktig for «hvem i Steinkjer» -søk.',
+      gjor: 'Bruk LocalBusiness eller ProfessionalService med adresse, postnummer og område.', tekst: null },
+    { sjekk: 'FAQ-schema', poeng: 8, tittel: 'FAQPage-schema for synlige spørsmål',
+      hvorfor: 'En FAQ i teksten hjelper ikke AI-søk før den er merket som FAQ. Det var nettopp dette V2 manglet.',
+      gjor: 'Lag JSON-LD med @type FAQPage, og bruk nøyaktig samme spørsmål og svar som står synlig.', tekst: 2 },
+    { sjekk: 'Kontakt (tel/mailto)', poeng: 6, tittel: 'Klikkbar kontakt',
+      hvorfor: 'Folk og AI-søk trenger en måte å ta kontakt på.',
+      gjor: 'Bruk <a href="tel:+47…"> og <a href="mailto:…">.', tekst: null },
+    { sjekk: 'H1', poeng: 6, tittel: 'Én H1 med tjeneste og sted',
+      hvorfor: 'H1 er sidens hovedtittel for leseren og søkemotoren.',
+      gjor: 'Én <h1> som sier hva du gjør og hvor, f.eks. «Nettsider og AI-chat i Steinkjer».', tekst: null },
+    { sjekk: 'llms.txt', poeng: 15, tittel: 'llms.txt i rotmappen',
+      hvorfor: 'En kort tekstfil som forteller AI-modeller hva bedriften tilbyr. Gir ekstra poeng i analysen.',
+      gjor: 'Legg filen i rotmappen (ikke i undermappe), slik at den er på /llms.txt.', tekst: 3 },
+    { sjekk: 'AI-boter tillatt (robots.txt)', poeng: 15, tittel: 'robots.txt som slipper inn AI-boter',
+      hvorfor: 'Blokkerer du GPTBot, ClaudeBot eller PerplexityBot, finnes du ikke i AI-søk.',
+      gjor: 'Sjekk robots.txt og fjern eventuelle «Disallow: /» for disse botene.', tekst: 4 },
+  ];
+
+  const siste = V[V.length - 1];
+  const tiltakListe = document.getElementById('tiltakliste');
+  TILTAK.forEach(t => {
+    const c = siste.checks.find(x => x.label === t.sjekk);
+    const status = c ? c.status : 'ukjent';
+    const fikset = status === 'ok';
+    const kort = el('div', { class: 'tiltak' },
+      el('span', { class: 'pts' }, `${t.poeng} p`),
+      el('h3', {}, t.tittel),
+      el('p', {}, el('strong', {}, 'Status i V3: '), el('span', { class: status }, etikett[status])),
+      el('p', {}, el('strong', {}, 'Hvorfor: '), t.hvorfor),
+      el('p', {}, el('strong', {}, 'Gjør slik: '), t.gjor),
+    );
+    if (t.tekst !== null) {
+      const tek = TEKST[t.tekst];
+      kort.append(el('div', { class: 'tekst' }, el('div', { class: 'etikett' }, 'Tekstforslag: ' + tek.tittel), el('pre', {}, tek.tekst)));
+    }
+    if (!fikset) kort.append(el('p', { class: 'note' }, 'Dette gir poeng når det er på plass og kan verifiseres.'));
+    tiltakListe.append(kort);
+  });
+
+  function renderAi() {
+    const box = document.getElementById("aiinnhold");
+    const d = window.AI_SJEKK;
+    if (!d) return;
+    box.innerHTML = "";
+    const f = (tag, txt, cls) => { const n = document.createElement(tag); n.textContent = txt; if (cls) n.className = cls; return n; };
+    box.append(f("p", "Nevnt i " + d.nevntAntall + " av " + d.totalt + " spørsmål (" + d.bransje + ", " + d.sted + ", " + d.domene + "). Modell: " + d.modell + ". Kjørt " + d.generert.slice(0, 10) + "."));
+    const tabell = document.createElement("table");
+    const hode = document.createElement("tr");
+    ["Spørsmål", "Nevnt?", "Plass"].forEach(t => hode.append(f("th", t)));
+    tabell.append(hode);
+    d.resultater.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.append(f("td", r.sporsmal), f("td", r.nevnt ? "Ja" : "Nei", r.nevnt ? "ok" : "mangler"), f("td", r.plass ? String(r.plass) : "–"));
+      tabell.append(tr);
+    });
+    box.append(tabell);
+    if (d.konkurrenter.length) {
+      box.append(f("h3", "Andre som nevnes oftest"));
+      const ul = document.createElement("ul");
+      d.konkurrenter.forEach(k => ul.append(f("li", k.navn + " (" + k.ganger + "×)")));
+      box.append(ul);
+    }
+    box.append(f("p", "Viktig: ChatGPT svarer ulikt fra gang til gang. Kjør flere ganger før du drar konklusjoner.", "note"));
+  }
+</script>
 </body>
 </html>
