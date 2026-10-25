@@ -9,5 +9,3 @@ Allow: /
 
 User-agent: PerplexityBot
 Allow: /
-
-Sitemap: https://dahl-ai-synlighet-test.lenkemotor.workers.dev/sitemap.xml
