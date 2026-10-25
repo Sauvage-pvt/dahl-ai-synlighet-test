@@ -8,28 +8,24 @@
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
   header { background: #0f6e5c; color: #fff; padding: 1.2rem 1rem; }
-  header h1 { margin: 0; font-size: 1.5rem; }
-  header a { color: #fff; opacity: .9; font-size: .9rem; }
-  .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
-  h2 { color: #0f6e5c; margin-top: 1.8rem; }
-  h3 { color: #0f6e5c; }
-  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-  th, td { padding: .6rem .7rem; border-bottom: 1px solid #e5e5e5; text-align: left; }
-  th { background: #f4f7f6; }
-  .ok { color: #0f6e5c; font-weight: 600; }
-  ul { padding-left: 1.2rem; }
-  li { margin: .3rem 0; }
-  .note { font-size: .9rem; color: #555; }
-  a { color: #0f6e5c; }
+  header h1 { margin: 0; font-size: 1.4rem; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  h2 { color: #0f6e5c; margin-top: 2rem; border-bottom: 1px solid #e0e0e0; padding-bottom: .3rem; }
+  h3 { color: #0f6e5c; margin-top: 1.4rem; }
+  ul, ol { padding-left: 1.3rem; }
+  li { margin: .35rem 0; }
+  pre { background: #f4f7f6; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; overflow-x: auto; font-size: .9rem; line-height: 1.45; }
+  .note { font-size: .9rem; color: #555; margin-top: .5rem; }
+  .box { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 1rem 1.2rem; margin: 1rem 0; }
 </style>
 </head>
 <body>
 <header>
   <h1>Score-forbedringer – SEO og GEO</h1>
-  <p><a href="/">← Tilbake til testene</a></p>
 </header>
 <div class="wrap">
-  <p>Dette er forslag til tiltak som forbedrer scoren i AI-synlighet-analysen. Tiltakene dekker både tradisjonell SEO og GEO (AI-synlighet).</p>
+
+  <p>Tiltak som forbedrer scoren i AI-synlighet-analysen, og som samtidig gjør bedriften lettere å finne i både Google og AI-søk.</p>
 
   <h2>1. Teknisk</h2>
   <ul>
@@ -60,23 +56,23 @@
   <ul>
     <li><strong>Schema.org</strong> – LocalBusiness (eller mer spesifikk type) med adresse, telefon, åpningstider og geo</li>
     <li><strong>llms.txt</strong> – kort sammendrag + lenker til viktige sider</li>
-    <li>Tillat AI-crawlers i robots.txt (GPTBot, ClaudeBot, PerplexityBot m.fl.)</li>
+    <li>Tillat AI-crawlers i robots.txt</li>
     <li>Viktig innhold synlig uten JavaScript</li>
     <li>FAQ-seksjon med spørsmål folk faktisk stiller</li>
     <li>Klar tekst som svarer på «hvor», «hva», «hvor mye» og «hvordan booke»</li>
   </ul>
 
   <h2>5. Tilstedeværelse på flere nettsamfunn</h2>
-  <p>AI og Google ser ikke bare på egen nettside. De henter informasjon fra mange kilder. Sterk tilstedeværelse utenfor hjemmesiden styrker både lokal SEO og sjansen for å bli nevnt i AI-svar.</p>
+  <p>AI og Google ser ikke bare på egen nettside. De henter informasjon fra mange kilder.</p>
   <ul>
     <li><strong>Google Business Profile</strong> – komplett profil med riktig kategori, bilder, åpningstider og svar på anmeldelser</li>
     <li><strong>Anmeldelser</strong> – aktive anmeldelser på Google, Trustpilot og/eller Tripadvisor</li>
     <li><strong>Sosiale medier</strong> – oppdatert Facebook og Instagram med konsistent informasjon</li>
     <li><strong>Kataloger og bransjesider</strong> – oppføring på relevante lokale og nasjonale sider</li>
     <li><strong>Konsistent NAP</strong> – samme navn, adresse og telefon overalt</li>
-    <li>Omtaler eller lenker fra andre nettsteder (nyheter, samarbeidspartnere, lokale sider)</li>
+    <li>Omtaler eller lenker fra andre nettsteder</li>
   </ul>
-  <p class="note">Dette gir ikke alltid direkte poeng i den automatiske analysen, men det påvirker sterkt hvor synlig bedriften blir i praksis – både i Google og i AI.</p>
+  <p class="note">Dette gir ikke alltid direkte poeng i den automatiske analysen, men det påvirker sterkt hvor synlig bedriften blir i praksis.</p>
 
   <h2>6. Konvertering</h2>
   <ul>
@@ -98,9 +94,24 @@
     <li>Booking / kontaktskjema</li>
   </ol>
 
-  <p class="note">Høyere score i analysen gir bedre grunnlag for både Google og AI-søk. Schema, lokal info, klar tekst og tilstedeværelse på flere plattformer gir vanligvis størst praktisk effekt.</p>
+  <h2>Eksempel: llms.txt</h2>
+  <p>Legg filen på <code>/llms.txt</code> på nettsiden. Her er et ferdig eksempel for Steinkjer Camping:</p>
 
-  <p><a href="/">← Tilbake til testene</a></p>
+  <div class="box">
+    <pre># Steinkjer Camping
+
+> Campingplass nær sentrum av Steinkjer med hytter, rom og caravanplasser. Åpent hele året. Enkel booking og kort vei til E6.
+
+## Overnatting
+- [Hytter og rom](https://steinkjercamping.no/overnatting.md): Priser og hva som er inkludert
+- [Booking](https://steinkjercamping.no/booking.md): Book direkte online
+
+## Praktisk
+- [Beliggenhet og fasiliteter](https://steinkjercamping.no/om.md): Adresse, dusj, kjøkken og avstand til sentrum</pre>
+  </div>
+
+  <p class="note">Bytt ut lenkene og teksten så de passer bedriften. Hold sammendraget kort og konkret.</p>
+
 </div>
 </body>
 </html>
