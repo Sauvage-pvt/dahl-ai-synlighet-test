@@ -1,19 +1,23 @@
 // Kjør: node analyzer/run.mjs
 // Analyserer alle versjonene lokalt og skriver data/data.js (brukes av index.html).
 import { readFileSync, writeFileSync } from 'node:fs';
-import { analyze } from './analyze.js';
+import { analyze, aiBotsAllowed } from './analyze.js';
+
+// robots.txt ligger i rotmappen og gjelder hele nettstedet, så den brukes for V1–V3.
+const robotsTxt = readFileSync('robots.txt', 'utf8');
+const robotsOk = aiBotsAllowed(robotsTxt);
 
 const versjoner = [
   { id: 'original', navn: 'Original', fil: 'data/original-observert.html',
     merk: 'Basert på observert kildeinnhold. H1 og kontaktlenker er ikke verifisert og telles ikke.',
     extras: { llms: undefined, robots: undefined }, ukjent: ['H1', 'Kontakt (tel/mailto)'] },
   { id: 'v1', navn: 'V1 – forbedret', fil: 'sider/1-v1-forbedret.html',
-    extras: { llms: false, robots: undefined } },
+    extras: { llms: false, robots: robotsOk } },
   { id: 'v2', navn: 'V2 – utvidet', fil: 'sider/2-v2-utvidet.html',
-    extras: { llms: false, robots: undefined } },
+    extras: { llms: false, robots: robotsOk } },
   { id: 'v3', navn: 'V3 – ferdig', fil: 'sider/3-ferdig.html',
     merk: 'llms.txt må legges i rotmappen på nettstedet for å telle.',
-    extras: { llms: false, robots: undefined } },
+    extras: { llms: false, robots: robotsOk } },
 ];
 
 const resultater = versjoner.map(v => {

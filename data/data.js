@@ -1,5 +1,5 @@
 window.DATA = {
-  "generert": "2026-10-19T16:22:02.469Z",
+  "generert": "2026-10-25T18:52:04.837Z",
   "versjoner": [
     {
       "id": "original",
@@ -74,8 +74,8 @@ window.DATA = {
       "id": "v1",
       "navn": "V1 – forbedret",
       "merk": null,
-      "score": 62,
-      "maxScore": 85,
+      "score": 77,
+      "maxScore": 100,
       "checks": [
         {
           "label": "Tittel",
@@ -133,8 +133,8 @@ window.DATA = {
         },
         {
           "label": "AI-boter tillatt (robots.txt)",
-          "status": "ukjent",
-          "value": "Ikke sjekket",
+          "status": "ok",
+          "value": "På plass",
           "points": 15
         }
       ]
@@ -143,8 +143,8 @@ window.DATA = {
       "id": "v2",
       "navn": "V2 – utvidet",
       "merk": null,
-      "score": 62,
-      "maxScore": 85,
+      "score": 77,
+      "maxScore": 100,
       "checks": [
         {
           "label": "Tittel",
@@ -202,8 +202,8 @@ window.DATA = {
         },
         {
           "label": "AI-boter tillatt (robots.txt)",
-          "status": "ukjent",
-          "value": "Ikke sjekket",
+          "status": "ok",
+          "value": "På plass",
           "points": 15
         }
       ]
@@ -212,8 +212,8 @@ window.DATA = {
       "id": "v3",
       "navn": "V3 – ferdig",
       "merk": "llms.txt må legges i rotmappen på nettstedet for å telle.",
-      "score": 70,
-      "maxScore": 85,
+      "score": 85,
+      "maxScore": 100,
       "checks": [
         {
           "label": "Tittel",
@@ -271,8 +271,8 @@ window.DATA = {
         },
         {
           "label": "AI-boter tillatt (robots.txt)",
-          "status": "ukjent",
-          "value": "Ikke sjekket",
+          "status": "ok",
+          "value": "På plass",
           "points": 15
         }
       ]
